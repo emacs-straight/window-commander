@@ -1,0 +1,194 @@
+Window Commander NEWS -- history of user-visible changes. -*- mode: outline -*-
+See the end of the file for an explanation of the versioning scheme.
+
+* 3.0
+
+** Rename to Window Commander.
+** Remove functions and vars obsoleted in version 2.x.
+** Accept a ':minibuffer' keyword argument for 'wincom-define-window-command'
+instead of using a positional argument.
+
+* 2.3
+
+** Rework window commands
+A new macro has been added ('swsw-define-window-command') which
+greatly simplifies the creation of window commands; existing commands
+now use it and 5 new window commands have been added:
+'swsw-delete-other', 'swsw-split-window-below' and
+'swsw-split-window-right', which correspond to the built-in commands,
+'swsw-selected-window-prefix', which displays the buffer of the next
+command in the selected window (Emacs 28+), and 'swsw-swap' which
+swaps the state of the current window and the selected window.
+
+* 2.2
+
+** Rework display functions
+'swsw-display-function' has been replaced by 'swsw-display-lighter',
+display functions should now be added to 'swsw-mode-hook'.
+For backwards compatibility, 'swsw-display-function' has been
+redefined as an obsolete alias of 'swsw-display-lighter', and
+'swsw-mode' currently still handles cases where the value of
+'swsw-display-lighter' is a function.
+Display functions which are added to 'swsw-mode-hook' shouldn't
+require any arguments.
+
+* 2.1.1
+
+** Indicate that some functions are for interactive use only.
+
+* 2.1
+
+** Bump required Emacs version to 27.1.
+
+** Update window information when switching frames.
+This fixes several issues when 'swsw-scope' isn't set to t.
+
+** Make 'swsw-select' and 'swsw-delete' respect 'swsw-scope'.
+Previously, 'swsw-select' and 'swsw-delete' would not select/delete
+the only other window if it was on a different frame and 'swsw-scope'
+allowed tracking it.
+
+** Remap 'other-window' to 'swsw-select' when 'swsw-mode' is active.
+By default this changes nothing since the default binding for
+'other-window' is 'C-x o'.
+This change has been made to add (simple) out-of-the-box compatibility
+with alternative key binding sets or different Emacs distributions
+(provided they bind 'other-window').
+
+* 2.0.2
+
+** No user visible changes.
+
+* 2.0.1
+
+** Add a link to the info node in the customization buffer.
+
+** Add version information to customizable variables.
+
+** Fix 'swsw-delete' when the only other tracked window is the minibuffer.
+
+* 2.0
+
+** Add support for custom window management commands.
+Binding a command to a key in 'swsw-command-map' allows you to call that
+command instead of selecting an ID.
+Currently three such commands are defined: 'swsw-select' (o),
+'swsw-select-minibuffer' (m), 'swsw-delete' (0).
+
+** Breaking changes
+
+*** 'swsw-minibuffer-id' is no longer defined or used anywhere, instead
+providing the same functionality through 'swsw-select-minibuffer'.
+
+*** 'swsw-select' no longer accepts a window ID as an optional argument.
+
+* 1.1.2
+
+** Apply customization options immediately.
+Customizing 'swsw-id-chars' and 'swsw-scope' and applying those changes now
+causes all window IDs to update.
+
+** Construct IDs without pre-computing all possible IDs.
+This should hopefully help performance when dealing with a very large
+number of windows.
+
+** Fix the calculation of the ID length.
+Previously the ID length reported was much bigger than it needed to
+be.
+
+** Prevent setting the minibuffer ID to a character which can be used to
+construct a regular ID, and vice versa.
+
+** Fix window selection occurring when entering an invalid ID.
+
+* 1.1.1
+
+** Bump required Emacs version to 26.1.
+
+** Add missing license information in several places.
+The info node was missing license information, and created archives were missing
+the LICENSE file.
+
+** Update the homepage of the package to dsemy.com/software/swsw.
+
+** Update documentation strings.
+Documentation strings for several functions and variables have been updated to
+be more clear and to better comply with Emacs' conventions.
+
+** Update installation instructions.
+Installation instructions have been updated to indicate the possibility of
+installing the package from GNU ELPA.
+Note: at the time of writing this, this isn't actually possible yet, but the
+instructions have been updated since I'm expecting this to be possible soon.
+
+* 1.1
+
+** Add the ability to customize the scope of 'swsw-mode'.
+'swsw-scope' controls in which frames 'swsw-mode' tracks windows.
+
+** Fix conditional display functions potentially breaking when the user presses
+'C-g' ('keyboard-quit') while reading a window ID.
+
+** Bind 'C-x o' to 'swsw-select' in 'swsw-mode-map' by default.
+
+** Add an info node.
+An info node (swsw) has been added which documents all user facing parts of the
+package in detail.
+
+* 1.0
+
+** Add support for multi-character IDs.
+IDs can now be constructed from multiple characters taken from 'swsw-id-chars',
+when there are enough tracked windows.
+
+** Add support for alternate display functions.
+A new customization variable has been added: 'swsw-display-function'.
+If it is set to a function, that function is used to display window IDs instead
+of the mode line lighter.
+See the documentation of the variable for more information.
+Two reference functions are provided:
+'swsw-mode-line-display-function' displays window IDs similarly to the way they
+were displayed before version 0.3.
+'swsw-mode-line-conditional-display-function' displays window IDs in the same way
+but only when window selection is in progress.
+
+* 0.3
+
+** Add a sparse key map to 'swsw-mode'.
+This allows creating key bindings which are only active when 'swsw-mode' is.
+
+** Use a mode line lighter to show the window ID instead of adding it to the
+start of the mode line.
+The lighter is only displayed if the window is tracked by swsw.
+
+* 0.2
+
+** Switching to the minibuffer is now possible.
+It is now possible to switch to the minibuffer (if it's active) by
+pressing a character unique to the minibuffer window (default 'm').
+
+** Use 'read-char' instead of 'read-char-from-minibuffer'.
+'swsw-select' used 'read-char-from-minibuffer' with 'swsw-id-prompt'
+as the prompt previously.
+The new implementation doesn't show a prompt (so 'swsw-id-prompt' was
+removed completely), and works on older Emacs versions.
+
+* 0.1
+
+** Initial version.
+
+* Versioning scheme
+Window Commander's versioning scheme is inspired by semver
+(https://semver.org/).  Each version number is of the form
+MAJOR.MINOR.PATCH (patch may be omitted if 0).
+The MAJOR version is bumped when a user facing variable or function
+changes in a way that could cause previous user configuration to
+break (where user configuration considered is configuration done
+through the customize interface).
+A MAJOR version bump is very unlikely.
+The MINOR version is bumped when a feature is added in a non-breaking
+way.
+The PATCH version is bumped when no feature is added (e.g. a version
+with only fixes, or changes to documentation).
+
+Note that versions before 1.0 did not follow this scheme.
