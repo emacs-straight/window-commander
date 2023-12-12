@@ -330,12 +330,11 @@ exit."
       (frame-toggle-on-screen-keyboard nil nil))
     (run-hooks 'wincom-before-command-hook)
     (setq this-command fun)
-    (set-transient-map wincom--id-map
-                       (lambda ()
-                         (and set (buffer-live-p b)
-                              (with-current-buffer b
-                                (set-text-conversion-style s)))
-                         (run-hooks 'wincom-after-command-hook)))))
+    (set-transient-map wincom--id-map nil
+                       `(lambda ()
+                          (and ',set (buffer-live-p ,b)
+                               (with-current-buffer ,b (funcall ',set ',s)))
+                          (run-hooks 'wincom-after-command-hook)))))
 
 (defmacro wincom-define-window-command (name args &rest body)
   "Define NAME as a window command with DOCSTRING as its documentation string.
@@ -487,6 +486,27 @@ selection.")
 
 ;;;; wincom mode:
 
+(defvar wincom-mode-menu
+  (let ((map (make-sparse-keymap "Windows")))
+    (define-key map [swap]
+                '("Swap with current..." . wincom-swap))
+    (when (fboundp 'display-buffer-override-next-command)
+      (define-key map [prefix]
+                  '("Redirect buffer of next command..."
+                    . wincom-selected-window-prefix)))
+    (define-key map [split-right]
+                '("New on right..." . wincom-split-window-right))
+    (define-key map [split-below]
+                '("New below..." . wincom-split-window-below))
+    (define-key map [delete-other]
+                '("Remove others..." . wincom-delete-other))
+    (define-key map [delete]
+                '("Remove..." . wincom-delete))
+    (define-key map [select]
+                '("Select..." . wincom-select))
+    map)
+  "Menu for window commands.")
+
 ;;;###autoload
 (define-minor-mode wincom-mode
   "Toggle Window Commander mode.
@@ -505,6 +525,8 @@ selection:
                        (wincom-format-id (selected-window))))
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map [remap other-window] #'wincom-select)
+            (define-key map [menu-bar wincom]
+                        (cons "Windows" wincom-mode-menu))
             map)
   (if wincom-mode
       (progn
