@@ -1,6 +1,6 @@
 ;;; window-commander.el --- Simply execute commands on windows -*- lexical-binding: t -*-
 
-;; Copyright (C) 2023 Free Software Foundation, Inc.
+;; Copyright (C) 2023-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Semyonov <daniel@dsemy.com>
 ;; Maintainer: Daniel Semyonov <daniel@dsemy.com>
@@ -48,24 +48,26 @@
 ;;   the minibuffer (by default, see `wincom-scope').
 ;; - `other-window' (C-x o by default) is remapped to `wincom-select'.
 ;;
-;; C-x o ID	switches focus to the window which corresponds to ID.
+;; C-x o ID    switches focus to the window which corresponds to ID.
 ;;
-;; C-x o 0 ID	deletes the window which corresponds to ID.
+;; C-x o 0 ID  deletes the window which corresponds to ID.
 ;;
-;; C-x o 1 ID	makes the window which corresponds to ID the sole
-;;		window of its frame.
+;; C-x o 1 ID  makes the window which corresponds to ID the sole
+;;             window of its frame.
 ;;
-;; C-x o 2 ID	splits the window which corresponds to ID from below.
+;; C-x o 2 ID  splits the window which corresponds to ID from below.
 ;;
-;; C-x o 3 ID	splits the window which corresponds to ID from the right.
+;; C-x o 3 ID  splits the window which corresponds to ID from the right.
 ;;
-;; C-x 0 4 ID	displays the buffer of the next command in the window
-;;		which corresponds to ID.
+;; C-x o 4 ID  displays the buffer of the next command in the window
+;;             which corresponds to ID.
 ;;
-;; C-x 0 t ID	swaps the states of the current window and the window
-;;		which corresponds to ID.
+;; C-x o t ID  swaps the states of the current window and the window
+;;             which corresponds to ID.
 ;;
-;; C-x o m	switches focus to the minibuffer if it's active.
+;; C-x o m     switches focus to the minibuffer if it's active.
+;;
+;; C-x o r     switches focus to the most recently used window.
 ;;
 ;; More commands can be added through `wincom-command-map':
 ;;
@@ -82,6 +84,7 @@
 (eval-when-compile
   (require 'subr-x)
   ;; Avoid byte-compilation warnings.
+  (defvar overriding-text-conversion-style)
   (defvar wincom-mode)
   (defvar wincom-command-map)
   (declare-function wincom-selected-window-prefix nil))
@@ -336,7 +339,7 @@ exit."
                                (with-current-buffer ,b (funcall ',set ',s)))
                           (run-hooks 'wincom-after-command-hook)))))
 
-(defmacro wincom-define-window-command (name args &rest body)
+(defmacro wincom-define-window-command (name arg &rest body)
   "Define NAME as a window command with DOCSTRING as its documentation string.
 
 Inside BODY, WINDOW and PREFIX (symbols) are bound to the selected
@@ -344,9 +347,9 @@ window and the raw prefix argument, respectively.
 If PREFIX is omitted or nil, the resulting command will not accept a
 prefix argument.
 
-Currently, only a single KEYWORD-ARG is recognized, `:minibuffer':
-When it's non-nil, allow the minibuffer to be selected by
-`next-window' (when there are less than `wincom-minimum' tracked windows).
+Currently, only a single KEYWORD ARG pair is recognized, `:minibuffer':
+When it's non-nil, allow the minibuffer to be selected by `next-window'
+\(when there are less than `wincom-minimum' tracked windows).
 
 For more information, see info node `(window-commander) Window Commands'.
 
@@ -354,7 +357,7 @@ For more information, see info node `(window-commander) Window Commands'.
   (declare (debug (&define name lambda-list [&optional stringp]
                            [&rest (gate keywordp form)] def-body))
            (doc-string 3) (indent defun))
-  (let* ((window (car args)) (prefix (cadr args))
+  (let* ((window (car arg)) (prefix (cadr arg))
          (docstring (car body))
          (kargs (if (keywordp (car body)) body (cdr body)))
          (minibuffer (plist-get kargs :minibuffer)))
@@ -463,14 +466,12 @@ indirectly called by the latter."
 
 (defun wincom-select-minibuffer ()
   "Select the active minibuffer window (if it exists)."
-  (declare (modes wincom-mode))
   (interactive)
   (select-window (or (active-minibuffer-window)
                      (user-error "There is no active minibuffer window"))))
 
 (defun wincom-select-most-recently-used ()
   "Select the most recently used window."
-  (declare (modes wincom-mode))
   (interactive)
   (when-let ((w (get-mru-window (wincom--get-scope) t t)))
     (select-window w)))
@@ -497,21 +498,25 @@ selection.")
 (defvar wincom-mode-menu
   (let ((map (make-sparse-keymap "Windows")))
     (define-key map [swap]
-                '("Swap with current..." . wincom-swap))
+                '("Select Window to Swap with the Current Window..."
+                  . wincom-swap))
     (when (fboundp 'display-buffer-override-next-command)
       (define-key map [prefix]
-                  '("Redirect buffer of next command..."
+                  '("Select Window to Show Buffer of Next Command in..."
                     . wincom-selected-window-prefix)))
     (define-key map [split-right]
-                '("New on right..." . wincom-split-window-right))
+                '("Select Window to Split Vertically..."
+                  . wincom-split-window-right))
     (define-key map [split-below]
-                '("New below..." . wincom-split-window-below))
+                '("Select Window to Split Horizontally..."
+                  . wincom-split-window-below))
     (define-key map [delete-other]
-                '("Remove others..." . wincom-delete-other))
+                '("Select Window to Occupy Whole Frame..."
+                  . wincom-delete-other))
     (define-key map [delete]
-                '("Remove..." . wincom-delete))
+                '("Select Window to Delete..." . wincom-delete))
     (define-key map [select]
-                '("Select..." . wincom-select))
+                '("Select Window..." . wincom-select))
     map)
   "Menu for window commands.")
 
