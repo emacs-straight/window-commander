@@ -1,2 +1,0 @@
-;; Generated package description from window-commander.el  -*- no-byte-compile: t -*-
-(define-package "window-commander" "3.0.2.0.20240314.125442" "Simply execute commands on windows" '((emacs "27.1")) :commit "0572966a0fabb0a15c109c4a8d33fc1a2adef41c" :authors '(("Daniel Semyonov" . "daniel@dsemy.com")) :maintainer '("Daniel Semyonov" . "daniel@dsemy.com") :keywords '("convenience") :url "https://dsemy.com/projects/window-commander")
