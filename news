@@ -1,0 +1,121 @@
+Window Commander NEWS -- history of user-visible changes. -*- mode: emacs-news -*-
+See the end of the file for an explanation of the versioning scheme.
+
+* 3.1
+
+** Add support for software keyboards which use 'text-conversion'.
+Full functionality should now be available using software keyboards on
+Android (if they have modifier keys).
+** Add minor mode menu for window commands.
+** Add command for selecting the most recently used window.
+** Fix window selection when less than 'wincom-minimum' windows are tracked.
+** Remove legacy display function support which was left in by accident.
+Setting 'wincom-display-lighter' to a function is now equivalent to
+setting it to any other non-nil value.
+
+* 3.0.2
+
+** Fix info manual.
+
+* 3.0.1
+
+** Fix ELPA build.
+
+* 3.0
+
+** Rename to Window Commander.
+** Remove functions and vars obsoleted in version 2.x.
+** Accept a ':minibuffer' keyword argument for 'wincom-define-window-command'
+instead of using a positional argument.
+
+* 2.3
+
+** Rework window commands
+A new macro has been added ('swsw-define-window-command') which
+greatly simplifies the creation of window commands; existing commands
+now use it and 5 new window commands have been added:
+'swsw-delete-other', 'swsw-split-window-below' and
+'swsw-split-window-right', which correspond to the built-in commands,
+'swsw-selected-window-prefix', which displays the buffer of the next
+command in the selected window (Emacs 28+), and 'swsw-swap' which
+swaps the state of the current window and the selected window.
+
+* 2.2
+
+** Rework display functions
+'swsw-display-function' has been replaced by 'swsw-display-lighter',
+display functions should now be added to 'swsw-mode-hook'.
+For backwards compatibility, 'swsw-display-function' has been
+redefined as an obsolete alias of 'swsw-display-lighter', and
+'swsw-mode' currently still handles cases where the value of
+'swsw-display-lighter' is a function.
+Display functions which are added to 'swsw-mode-hook' shouldn't
+require any arguments.
+
+* 2.1.1
+
+** Indicate that some functions are for interactive use only.
+
+* 2.1
+
+** Bump required Emacs version to 27.1.
+
+** Update window information when switching frames.
+This fixes several issues when 'swsw-scope' isn't set to t.
+
+** Make 'swsw-select' and 'swsw-delete' respect 'swsw-scope'.
+Previously, 'swsw-select' and 'swsw-delete' would not select/delete
+the only other window if it was on a different frame and 'swsw-scope'
+allowed tracking it.
+
+** Remap 'other-window' to 'swsw-select' when 'swsw-mode' is active.
+By default this changes nothing since the default binding for
+'other-window' is 'C-x o'.
+This change has been made to add (simple) out-of-the-box compatibility
+with alternative key binding sets or different Emacs distributions
+(provided they bind 'other-window').
+
+* 2.0.2
+
+** No user visible changes.
+
+* 2.0.1
+
+** Add a link to the info node in the customization buffer.
+
+** Add version information to customizable variables.
+
+** Fix 'swsw-delete' when the only other tracked window is the minibuffer.
+
+* 2.0
+
+** Add support for custom window management commands.
+Binding a command to a key in 'swsw-command-map' allows you to call that
+command instead of selecting an ID.
+Currently three such commands are defined: 'swsw-select' (o),
+'swsw-select-minibuffer' (m), 'swsw-delete' (0).
+
+** Breaking changes
+
+*** 'swsw-minibuffer-id' is no longer defined or used anywhere, instead
+providing the same functionality through 'swsw-select-minibuffer'.
+
+*** 'swsw-select' no longer accepts a window ID as an optional argument.
+
+* 1.1.2
+
+** Apply customization options immediately.
+Customizing 'swsw-id-chars' and 'swsw-scope' and applying those changes now
+causes all window IDs to update.
+
+** Construct IDs without pre-computing all possible IDs.
+This should hopefully help performance when dealing with a very large
+number of windows.
+
+** Fix the calculation of the ID length.
+Previously the ID length reported was much bigger than it needed to
+be.
+
+** Prevent setting the minibuffer ID to a character which can be used to
+...
+...
